@@ -1,10 +1,10 @@
-## 👋 Welcome
+👋 Welcome
 
 With this project, you can create your own Telegram bot and generate AI images for free.
 
 To get started, follow the setup steps below:
 
-## ⚙️ Installation & Setup
+⚙️ Installation & Setup
 
 Follow these steps to run the bot:
 

@@ -1,17 +1,29 @@
 import logging
 import asyncio
 import aiohttp
-import base64
+import os
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import Command
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
 
-# --- TOKEN VA API KEY ---
-TELEGRAM_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
-INFIP_API_KEY = "YOUR_API_KEY"
-INFIP_BASE_URL = "https://api.infip.pro"
+# --- TOKEN ---
+TELEGRAM_TOKEN = "YOUR_BOT_TOKEN"
+
+def _load_env():
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    with open(env_path) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, val = line.split("=", 1)
+                os.environ.setdefault(key.strip(), val.strip())
+
+_load_env()
+
+INFIP_API_KEY = os.environ["INFIP_API_KEY"]
+INFIP_BASE_URL = os.environ["INFIP_BASE_URL"]
 
 # --- LOGGING ---
 logging.basicConfig(level=logging.INFO)
@@ -68,15 +80,11 @@ def model_keyboard():
     rows = []
     for key, model in MODELS.items():
         rows.append([KeyboardButton(text=f"🔸 {model['label']}")])
-    
-    # YANGI TUGMA
     rows.append([KeyboardButton(text="🌐 Boshqa modellar")])
-    
     rows.append([KeyboardButton(text="⬅️ Orqaga")])
     return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
 
 def count_keyboard():
-    """1-4 ta rasm tanlash"""
     btns = [KeyboardButton(text=str(i)) for i in range(1, 5)]
     return ReplyKeyboardMarkup(
         keyboard=[btns, [KeyboardButton(text="⬅️ Orqaga")]],
@@ -100,7 +108,6 @@ def get_state(user_id):
     return user_states[user_id]
 
 def find_model_by_label(text: str):
-    """Tugma matni bo'yicha model key topish"""
     clean = text.replace("🔸 ", "").strip()
     for key, val in MODELS.items():
         if val["label"] == clean:
@@ -108,7 +115,6 @@ def find_model_by_label(text: str):
     return None
 
 async def generate_images(state: dict, prompt: str) -> list:
-    """Rasmlarni generatsiya qilish"""
     model_key = state["model"]
     model_info = MODELS[model_key]
     size = RATIO_TO_SIZE[state["ratio"]]
@@ -118,7 +124,7 @@ async def generate_images(state: dict, prompt: str) -> list:
         "Authorization": f"Bearer {INFIP_API_KEY}",
         "Content-Type": "application/json"
     }
-    
+
     payload = {
         "model": model_key,
         "prompt": prompt,
@@ -213,7 +219,6 @@ async def prompt_btn(message: types.Message):
     state["waiting_prompt"] = True
     await message.answer("📝 <b>Promptingizni yozing</b> (inglizcha yaxshi natija beradi):")
 
-# --- RATIO TUGMALARI ---
 @dp.message(F.text.in_(["⬜ 1:1", "📺 16:9", "📱 9:16"]))
 async def set_ratio(message: types.Message):
     state = get_state(message.from_user.id)
@@ -222,21 +227,16 @@ async def set_ratio(message: types.Message):
     state["ratio"] = ratio
     await message.answer(f"✅ Format tanlandi: <b>{ratio}</b> ({RATIO_TO_SIZE[ratio]})", reply_markup=main_keyboard())
 
-# --- COUNT TUGMALARI (1, 2, 3, 4) ---
 @dp.message(F.text.in_(["1", "2", "3", "4"]))
 async def set_count(message: types.Message):
     state = get_state(message.from_user.id)
-    
     if state.get("waiting_prompt"):
-        # Prompt sifatida qabul qilish
         await handle_prompt_text(message)
         return
-    
     n = int(message.text)
     state["count"] = n
     await message.answer(f"✅ Rasm soni tanlandi: <b>{n}</b>", reply_markup=main_keyboard())
 
-# --- MODEL TUGMALARI ---
 @dp.message(F.text.startswith("🔸 "))
 async def set_model(message: types.Message):
     state = get_state(message.from_user.id)
@@ -252,13 +252,10 @@ async def set_model(message: types.Message):
         reply_markup=main_keyboard()
     )
 
-#-----------BOSHQA MODELLAR-----------
 @dp.message(F.text == "🌐 Boshqa modellar")
 async def other_models(message: types.Message):
     await message.answer("Boshqa modellar 👉 https://infip.pro/")
-    
-    
-# --- PROMPT MATN QABUL QILISH ---
+
 async def handle_prompt_text(message: types.Message):
     state = get_state(message.from_user.id)
     prompt = message.text
@@ -275,7 +272,6 @@ async def handle_prompt_text(message: types.Message):
 
     try:
         urls = await generate_images(state, prompt)
-
         if urls:
             for i, url in enumerate(urls):
                 caption = f"✅ Tayyor! ({i+1}/{len(urls)})\n🤖 {model_info['label']}" if len(urls) > 1 else f"✅ Tayyor!\n🤖 {model_info['label']}"
@@ -293,13 +289,10 @@ async def handle_prompt_text(message: types.Message):
 @dp.message()
 async def handle_message(message: types.Message):
     state = get_state(message.from_user.id)
-
     if state.get("waiting_prompt"):
         await handle_prompt_text(message)
         return
-
     await message.answer("❓ Tugmalardan foydalaning.", reply_markup=main_keyboard())
-
 
 # --- BOTNI ISHGA TUSHURISH ---
 async def main():

@@ -29,11 +29,11 @@ INFIP_BASE_URL = os.environ["INFIP_BASE_URL"]
 # --- LOGGING ---
 logging.basicConfig(level=logging.INFO)
 
-# --- BOT VA DISPATCHER ---
+# --- BOT AND DISPATCHER ---
 bot = Bot(token=TELEGRAM_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 
-# --- MODELLAR MA'LUMOTLARI ---
+# --- MODEL DATA ---
 MODELS = {
     "img3": {
         "label": "🌟 Imagen 3",
@@ -65,14 +65,14 @@ def default_state():
 
 user_states = {}
 
-# --- KLAVIATURALAR ---
+# --- KEYBOARDS ---
 
 def main_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="🖼 Model"), KeyboardButton(text="🔢 Count")],
             [KeyboardButton(text="📐 Ratio")],
-            [KeyboardButton(text="📝 Prompt yubor")],
+            [KeyboardButton(text="📝 Send a prompt")],
         ],
         resize_keyboard=True
     )
@@ -81,14 +81,14 @@ def model_keyboard():
     rows = []
     for key, model in MODELS.items():
         rows.append([KeyboardButton(text=f"🔸 {model['label']}")])
-    rows.append([KeyboardButton(text="🌐 Boshqa modellar")])
-    rows.append([KeyboardButton(text="⬅️ Orqaga")])
+    rows.append([KeyboardButton(text="🌐 Other models")])
+    rows.append([KeyboardButton(text="⬅️ Back")])
     return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
 
 def count_keyboard():
     btns = [KeyboardButton(text=str(i)) for i in range(1, 5)]
     return ReplyKeyboardMarkup(
-        keyboard=[btns, [KeyboardButton(text="⬅️ Orqaga")]],
+        keyboard=[btns, [KeyboardButton(text="⬅️ Back")]],
         resize_keyboard=True
     )
 
@@ -96,12 +96,12 @@ def ratio_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="⬜ 1:1"), KeyboardButton(text="📺 16:9"), KeyboardButton(text="📱 9:16")],
-            [KeyboardButton(text="⬅️ Orqaga")]
+            [KeyboardButton(text="⬅️ Back")]
         ],
         resize_keyboard=True
     )
 
-# --- YORDAMCHI FUNKSIYALAR ---
+# --- HELPER FUNCTIONS ---
 
 def get_state(user_id):
     if user_id not in user_states:
@@ -166,17 +166,17 @@ async def generate_images(state: dict, prompt: str) -> list:
 async def start_cmd(message: types.Message):
     user_states[message.from_user.id] = default_state()
     await message.answer(
-        "👋 Salom! Men <b>FreePic AI</b> botman.\n\n"
-        "🎨 Matndan rasm (TTI) yaratamanman.\n"
-        "Quyidagi tugmalardan foydalaning:",
+        "👋 Hello! I am the <b>FreePic AI</b> bot.\n\n"
+        "🎨 I generate images from text (TTI).\n"
+        "Use the buttons below:",
         reply_markup=main_keyboard()
     )
 
-@dp.message(F.text == "⬅️ Orqaga")
+@dp.message(F.text == "⬅️ Back")
 async def back_handler(message: types.Message):
     state = get_state(message.from_user.id)
     state["waiting_prompt"] = False
-    await message.answer("🏠 Asosiy menyu", reply_markup=main_keyboard())
+    await message.answer("🏠 Main Menu", reply_markup=main_keyboard())
 
 @dp.message(F.text == "🖼 Model")
 async def model_menu(message: types.Message):
@@ -187,8 +187,8 @@ async def model_menu(message: types.Message):
         for v in MODELS.values()
     ])
     await message.answer(
-        f"🤖 <b>Modelni tanlang</b>\n"
-        f"Hozirgi: <b>{current}</b>\n\n"
+        f"🤖 <b>Select a model</b>\n"
+        f"Current model: <b>{current}</b>\n\n"
         "━━━━━━━━━━━━━━━━\n" + model_list,
         reply_markup=model_keyboard()
     )
@@ -199,9 +199,9 @@ async def count_menu(message: types.Message):
     model_key = state["model"]
     model_info = MODELS[model_key]
     await message.answer(
-        f"🔢 <b>Rasm sonini tanlang</b>\n"
+        f"🔢 <b>Select the number of images</b>\n"
         f"Model: <b>{model_info['label']}</b>\n"
-        f"Bu model maksimal <b>4</b> ta rasm chiqara oladi:",
+        f"This model can generate a maximum of <b>4</b> images:",
         reply_markup=count_keyboard()
     )
 
@@ -209,16 +209,16 @@ async def count_menu(message: types.Message):
 async def ratio_menu(message: types.Message):
     state = get_state(message.from_user.id)
     await message.answer(
-        f"📐 <b>Format (Ratio) tanlang</b>\n"
-        f"Hozirgi: <b>{state['ratio']}</b>",
+        f"📐 <b>Select a format (Ratio)</b>\n"
+        f"Current ratio: <b>{state['ratio']}</b>",
         reply_markup=ratio_keyboard()
     )
 
-@dp.message(F.text == "📝 Prompt yubor")
+@dp.message(F.text == "📝 Send a prompt")
 async def prompt_btn(message: types.Message):
     state = get_state(message.from_user.id)
     state["waiting_prompt"] = True
-    await message.answer("📝 <b>Promptingizni yozing</b> (inglizcha yaxshi natija beradi):")
+    await message.answer("📝 <b>Enter your prompt</b> (English gives better results):")
 
 @dp.message(F.text.in_(["⬜ 1:1", "📺 16:9", "📱 9:16"]))
 async def set_ratio(message: types.Message):
@@ -226,7 +226,7 @@ async def set_ratio(message: types.Message):
     ratio_map = {"⬜ 1:1": "1:1", "📺 16:9": "16:9", "📱 9:16": "9:16"}
     ratio = ratio_map[message.text]
     state["ratio"] = ratio
-    await message.answer(f"✅ Format tanlandi: <b>{ratio}</b> ({RATIO_TO_SIZE[ratio]})", reply_markup=main_keyboard())
+    await message.answer(f"✅ Format selected: <b>{ratio}</b> ({RATIO_TO_SIZE[ratio]})", reply_markup=main_keyboard())
 
 @dp.message(F.text.in_(["1", "2", "3", "4"]))
 async def set_count(message: types.Message):
@@ -236,26 +236,26 @@ async def set_count(message: types.Message):
         return
     n = int(message.text)
     state["count"] = n
-    await message.answer(f"✅ Rasm soni tanlandi: <b>{n}</b>", reply_markup=main_keyboard())
+    await message.answer(f"✅ Number of images selected: <b>{n}</b>", reply_markup=main_keyboard())
 
 @dp.message(F.text.startswith("🔸 "))
 async def set_model(message: types.Message):
     state = get_state(message.from_user.id)
     model_key = find_model_by_label(message.text)
     if not model_key:
-        await message.answer("❓ Model topilmadi.")
+        await message.answer("❓ Model not found.")
         return
     state["model"] = model_key
     info = MODELS[model_key]
     await message.answer(
-        f"✅ Model tanlandi: <b>{info['label']}</b>\n"
+        f"✅ Model selected: <b>{info['label']}</b>\n"
         f"📝 {info['desc']}",
         reply_markup=main_keyboard()
     )
 
-@dp.message(F.text == "🌐 Boshqa modellar")
+@dp.message(F.text == "🌐 Other models")
 async def other_models(message: types.Message):
-    await message.answer("Boshqa modellar 👉 https://infip.pro/")
+    await message.answer("Other models 👉 https://infip.pro/")
 
 async def handle_prompt_text(message: types.Message):
     state = get_state(message.from_user.id)
@@ -265,9 +265,9 @@ async def handle_prompt_text(message: types.Message):
     model_info = MODELS[model_key]
 
     await message.answer(
-        f"⏳ <b>Rasm tayyorlanmoqda...</b>\n"
+        f"⏳ <b>Generating image...</b>\n"
         f"🤖 Model: {model_info['label']}\n"
-        f"🔢 Soni: {state['count']}\n"
+        f"🔢 Count: {state['count']}\n"
         f"📐 Ratio: {state['ratio']}"
     )
 
@@ -275,17 +275,17 @@ async def handle_prompt_text(message: types.Message):
         urls = await generate_images(state, prompt)
         if urls:
             for i, url in enumerate(urls):
-                caption = f"✅ Tayyor! ({i+1}/{len(urls)})\n🤖 {model_info['label']}" if len(urls) > 1 else f"✅ Tayyor!\n🤖 {model_info['label']}"
+                caption = f"✅ Done! ({i+1}/{len(urls)})\n🤖 {model_info['label']}" if len(urls) > 1 else f"✅ Done!\n🤖 {model_info['label']}"
                 await message.answer_photo(photo=url, caption=caption)
         else:
-            await message.answer("⚠️ Rasm yaratishda xatolik yuz berdi.\n\n💡 Masalani bartaraf etish uchun:\n• API keying to'g'ri bo'lganini tekshiring\n• Boshqa prompt sinab ko'ring\n• Bir necha sekunddan so'ng qayta urinib ko'ring")
+            await message.answer("⚠️ An error occurred while generating the image.\n\n💡 To fix the issue:\n• Check that your API key is correct\n• Try a different prompt\n• Wait a few seconds and try again")
     except asyncio.TimeoutError:
-        await message.answer("⏱ Vaqt tugadi. Model hozir band bo'lishi mumkin, keyinroq urinib ko'ring.")
+        await message.answer("⏱ Time is up. The model may be busy right now, please try again later.")
     except Exception as e:
-        logging.error(f"Xato: {e}")
-        await message.answer(f"❌ Xatolik yuz berdi:\n<code>{str(e)[:200]}</code>")
+        logging.error(f"Error: {e}")
+        await message.answer(f"❌ An error occurred:\n<code>{str(e)[:200]}</code>")
     finally:
-        await message.answer("🏠 Asosiy menyu", reply_markup=main_keyboard())
+        await message.answer("🏠 Main Menu", reply_markup=main_keyboard())
 
 @dp.message()
 async def handle_message(message: types.Message):
@@ -293,11 +293,11 @@ async def handle_message(message: types.Message):
     if state.get("waiting_prompt"):
         await handle_prompt_text(message)
         return
-    await message.answer("❓ Tugmalardan foydalaning.", reply_markup=main_keyboard())
+    await message.answer("❓ Use the buttons.", reply_markup=main_keyboard())
 
-# --- BOTNI ISHGA TUSHURISH ---
+# --- START THE BOT ---
 async def main():
-    logging.info("Bot ishga tushirildi...")
+    logging.info("Bot started...")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":

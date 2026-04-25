@@ -69,8 +69,9 @@ def model_keyboard():
     rows = []
     for key, model in MODELS.items():
         rows.append([KeyboardButton(text=f"🔸 {model['label']}")])
-    rows.append([KeyboardButton(text="⬅️ Orqaga")])
-    return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
+        rows.append([KeyboardButton(text="🌐 Boshqa modellar")])
+        rows.append([KeyboardButton(text="⬅️ Orqaga")])
+        return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
 
 def count_keyboard():
     """1-4 ta rasm tanlash"""
@@ -249,6 +250,12 @@ async def set_model(message: types.Message):
         reply_markup=main_keyboard()
     )
 
+#-----------BOSHQA MODELLAR-----------
+@dp.message(F.text == "🌐 Boshqa modellar")
+async def other_models(message: types.Message):
+    await message.answer("Boshqa modellar 👉 https://infip.pro/")
+    
+    
 # --- PROMPT MATN QABUL QILISH ---
 async def handle_prompt_text(message: types.Message):
     state = get_state(message.from_user.id)

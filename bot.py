@@ -65,13 +65,15 @@ def main_keyboard():
     )
 
 def model_keyboard():
-    """Barcha modellarni ko'rsatish"""
     rows = []
     for key, model in MODELS.items():
         rows.append([KeyboardButton(text=f"🔸 {model['label']}")])
-        rows.append([KeyboardButton(text="🌐 Boshqa modellar")])
-        rows.append([KeyboardButton(text="⬅️ Orqaga")])
-        return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
+    
+    # YANGI TUGMA
+    rows.append([KeyboardButton(text="🌐 Boshqa modellar")])
+    
+    rows.append([KeyboardButton(text="⬅️ Orqaga")])
+    return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
 
 def count_keyboard():
     """1-4 ta rasm tanlash"""

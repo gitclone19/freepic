@@ -11,6 +11,7 @@ from aiogram.client.default import DefaultBotProperties
 # --- TOKEN ---
 TELEGRAM_TOKEN = "YOUR_BOT_TOKEN"
 
+
 def _load_env():
     env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
     with open(env_path) as f:

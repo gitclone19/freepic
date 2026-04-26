@@ -1,11 +1,12 @@
-👋 Welcome
+## 👋 Welcome
 
 With this project, you can create your own Telegram bot and generate AI images for free.
 
 To get started, follow the setup steps below:
 
+---
 
-⚙️ Installation & Setup
+## ⚙️ Installation & Setup
 
 Follow these steps to run the bot:
 
@@ -18,7 +19,7 @@ cd freepic
 2. Create virtual environment
 
 ```
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate   # Linux / Mac
 venv\Scripts\activate      # Windows
 ```
@@ -30,7 +31,7 @@ pip install -r requirements.txt
 ```
 ---
 
-🤖 Create Telegram Bot (BotFather)
+## 🤖 Create Telegram Bot (BotFather)
 
 1. Open Telegram and search for **@BotFather**
 2. Start the bot and send:
@@ -50,7 +51,7 @@ pip install -r requirements.txt
 
 ---
 
-🔑 Configure Bot
+## 🔑 Configure Bot
 
 Open your project file:
 ```
@@ -68,7 +69,7 @@ TELEGRAM_TOKEN = "123456:ABC-XYZ..."
 ```
 ---
 
-▶️ Run the Bot
+## ▶️ Run the Bot
 
 ```
 python bot.py
@@ -80,7 +81,7 @@ Bot started...
 
 ---
 
-🎨 Usage
+## 🎨 Usage
 
 1. Open your bot in Telegram
 2. Click **Start**

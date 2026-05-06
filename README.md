@@ -9,10 +9,11 @@ Build your own personal AI image generator and start creating high-quality visua
 ## 👋 Overview
 
 With FreePic AI, you can:
-- Generate AI images in seconds
-- Use your own Telegram bot
-- Customize generation settings
-- Access powerful AI tools without paying
+
+* Generate AI images in seconds
+* Use your own Telegram bot
+* Customize generation settings
+* Access powerful AI tools without paying
 
 No complex setup. No coding experience required.
 
@@ -23,10 +24,11 @@ No complex setup. No coding experience required.
 Follow these steps to run the bot locally:
 
 ### 1. Clone the repository
+
 ```bash
 git clone https://github.com/yoqubov-dev/freepic.git
 cd freepic
-````
+```
 
 ### 2. Create virtual environment
 
@@ -67,6 +69,8 @@ pip install -r requirements.txt
 
 ## 🔑 Configuration
 
+### 1. Set Telegram Bot Token
+
 Open the bot file:
 
 ```bash
@@ -83,6 +87,34 @@ Replace with your token:
 
 ```python
 TELEGRAM_TOKEN = "123456:ABC-XYZ..."
+```
+
+---
+
+### 2. Configure API Token (.env)
+
+Open or create the `.env` file in the project root:
+
+```bash
+nano .env
+```
+
+Find:
+
+```env
+YOUR_TOKEN=your_api_token_here
+```
+
+Now go to:
+
+```
+https://infip.pro/
+```
+
+Generate your API token from the website and paste it here:
+
+```env
+YOUR_TOKEN=your_generated_token_from_infip
 ```
 
 ---
@@ -139,7 +171,7 @@ Bot started...
 ## ⚠️ Notes
 
 * Make sure your bot token is correct
-* Keep your token private
+* Keep your tokens private
 * Use English prompts for best results
 
 ---

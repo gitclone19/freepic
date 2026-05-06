@@ -100,10 +100,10 @@ nano .env
 Add this line:
 
 ```env
-YOUR_TOKEN=your_token_here
+YOUR_API_KEY=your_api_here
 ```
 
-Go to [https://infip.pro/](https://infip.pro/) , create your token, and paste it here.
+Go to [https://infip.pro/](https://infip.pro/) , create your api key, and paste it here.
 
 ---
 

@@ -24,7 +24,7 @@ Follow these steps to run the bot locally:
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/gitclone19/freepic.git
+git clone https://github.com/yoqubov-dev/freepic.git
 cd freepic
 ````
 
